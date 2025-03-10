@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin panel</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+
+<div class="alert alert-success" id="successAlert" role="alert">
+  <p id="alertMsg"></p>
+  <span class="timer-line"></span>
+</div>
+
+<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editUserModalLabel">Edit user</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <form id="editUserForm">
+        <div class="modal-body col-12 d-flex align-items-center flex-column">
+          <p class="m-0 text-center">ID</p>
+          <input class="col-7 border rounded py-1 mb-3" type="text" id="editUserId" readonly>
+
+          <p class="m-0 text-center">First name</p>
+          <input class="col-7 border rounded py-1 mb-3" type="text" id="editName" value="">
+
+          <p class="m-0 text-center">Last name</p>
+          <input class="col-7 border rounded py-1 mb-3" type="text" id="editLastname">
+
+          <p class="m-0 text-center">Age</p>
+          <input class="col-7 border rounded py-1 mb-3" type="text" id="editAge">
+
+          <p class="m-0 text-center">Email</p>
+          <input class="col-7 border rounded py-1 mb-3" type="email" id="editEmail">
+
+          <p class="m-0 text-center">Password</p>
+          <input class="col-7 border rounded py-1 mb-3" type="password" id="editPassword">
+
+          <p class="m-0">Role</p>
+          <div class="col-7 mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="roleToEdit" id="userCheckRole" value="USER">
+              <label class="form-check-label">USER</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="roleToEdit" id="adminCheckRole" value="ADMIN">
+              <label class="form-check-label">ADMIN</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="closeEdit">Close</button>
+          <button type="submit" class="btn btn-primary">Edit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="removeUserModalLabel">Delete user</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="deleteUserForm">
+        <div class="modal-body col-12 d-flex align-items-center flex-column">
+          <p class="m-0 text-center">ID</p>
+          <input class="col-7 border rounded py-1 mb-3" type="text" id="deleteUserId" readonly>
+
+          <p class="m-0 text-center">First name</p>
+          <input class="col-7 border rounded py-1 mb-3" type="text" id="deleteName" value="">
+
+          <p class="m-0 text-center">Last name</p>
+          <input class="col-7 border rounded py-1 mb-3" type="text" id="deleteLastname">
+
+          <p class="m-0 text-center">Age</p>
+          <input class="col-7 border rounded py-1 mb-3" type="text" id="deleteAge">
+
+          <p class="m-0 text-center">Email</p>
+          <input class="col-7 border rounded py-1 mb-3" type="email" id="deleteEmail">
+
+          <p class="m-0">Role</p>
+          <input class="col-7 border rounded py-1 mb-3" type="password" id="deleteRoles">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="closeDelete" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="container-fluid bg-dark px-4 py-2 d-flex justify-content-between align-items-center" id="header">
+  <p class="text-white m-0">
+    <span id="userDataEmail">email@mail.ru</span>
+    with roles:
+    <span id="userDataRoles">ADMIN</span>
+  </p>
+
+  <form th:action="@{/logout}" method="post">
+    <button type="submit" class="text-secondary">Logout</button>
+  </form>
+</div>
+
+<div class="container-fluid m-0 p-0 d-inline-flex justify-content-between align-items-center custom" id="sections">
+  <div class="col-2 bg-white m-0 p-0 customDiv">
+    <div class="container-fluid m-0 p-0 pt-2">
+      <p class="bg-primary text-white pl-3 py-2 m-0 btn-custom" style="cursor: pointer;">Admin</p>
+      <p class="bg-white text-primary pl-3 py-2 m-0 btn-custom" style="cursor: pointer;">User</p>
+    </div>
+  </div>
+
+  <div class="col-10 px-4 py-3 customDiv" id="adminPanel">
+    <h2>Admin panel</h2>
+
+    <ul class="nav nav-tabs">
+      <li class="nav-item" id="showUsersList" style="cursor: pointer;">
+        <p class="nav-link text-primary m-0 active" id="showUsersListBtn">Users table</p>
+      </li>
+      <li class="nav-item" id="showAddUserForm" style="cursor: pointer;">
+        <p class="nav-link m-0" id="showAddUserFormBtn">New User</p>
+      </li>
+    </ul>
+    <div class="border" id="usersList">
+      <p class="alert-secondary py-2 pl-3 border-bottom">All users</p>
+
+      <div class="container-fluid px-4 pb-4" id="usersTable">
+        <table class="col-12">
+          <thead class="users-table-head">
+          <tr>
+            <td class="py-3 pl-2">ID</td>
+            <td class="py-3">First Name</td>
+            <td class="py-3">Last Name</td>
+            <td class="py-3">Age</td>
+            <td class="py-3">Email</td>
+            <td class="py-3">Role</td>
+            <td class="py-3">Edit</td>
+            <td class="py-3">Delete</td>
+          </tr>
+          </thead>
+          <tbody id="users-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="border" id="addUserForm" style="display: none;">
+      <p class="alert-secondary py-2 pl-3 m-0 border-bottom">Add user</p>
+      <form id="addNewUser" class="bg-white d-flex flex-column align-items-center py-3">
+        <p class="m-0">First name</p>
+        <input class="col-4 border rounded py-1 mb-3" type="text" id="nameToAdd" placeholder="First name" required>
+
+        <p class="m-0">Last name</p>
+        <input class="col-4 border rounded py-1 mb-3" type="text" id="lastnameToAdd" placeholder="Last name" required>
+
+        <p class="m-0">Age</p>
+        <input class="col-4 border rounded py-1 mb-3" type="number" id="ageToAdd" placeholder="Age" required>
+
+        <p class="m-0">Email</p>
+        <input class="col-4 border rounded py-1 mb-3" type="email" id="emailToAdd" placeholder="Email" required>
+
+        <p class="m-0">Password</p>
+        <input class="col-4 border rounded py-1 mb-3" type="password" id="passwordToAdd" placeholder="Password" required>
+
+        <p class="m-0">Role</p>
+        <div class="col-4 mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="roleToAdd" id="userCheckRole" value="USER">
+            <label class="form-check-label" for="userCheckRole">USER</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="roleToAdd" id="adminCheckRole" value="ADMIN">
+            <label class="form-check-label" for="adminCheckRole">ADMIN</label>
+          </div>
+        </div>
+
+        <button class="btn btn-success" type="submit" id="addUserBtn">Add new user</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-10 px-4 py-3 customDiv" id="userInfo" style="display: none;">
+    <h2>User information-page</h2>
+
+    <div class="border">
+      <p class="alert-secondary py-2 pl-3 border-bottom">About user</p>
+      <div class="container-fluid px-4 pb-4">
+        <table class="col-12">
+          <thead>
+          <tr class="border-top bg-white">
+            <td class="py-2 pl-2">ID</td>
+            <td>First Name</td>
+            <td>Last Name</td>
+            <td>Age</td>
+            <td>Email</td>
+            <td>Role</td>
+          </tr>
+          </thead>
+          <tbody id="authorizedUserData">
+          <!-- Динамически выводимая информация об авторизованном пользователе -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.20/fetch.js" integrity="sha512-HcIFTco6s7ipvn1hPSsztqwgA0u1BlgMmFCUS1qCEyT76pSP1F5//mawE+95ZRQ3U1LxtyIMyT6+tyJg36UOew==" type="module" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="/changeSelections.js"></script>
+<script src="/api.js"></script>
+<script src="/showModal.js"></script>
+
+
+</body>
+
+<style>
+  body {
+    background: rgb(244, 244, 244);
+    overflow: hidden;
+  }
+
+  button {
+    background: none;
+    border: none;
+  }
+
+  .custom {
+    height: 95vh;
+  }
+
+  .customDiv {
+    height: 100%;
+  }
+
+  #usersTable tr:nth-child(even) {
+    background: #fff;
+  }
+
+  a {
+    width: 100%;
+    height: 100%;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  a:hover{
+    color: #fff;
+    text-decoration: none;
+  }
+
+  #successAlert {
+    margin: 0;
+    padding: 15px 0 0 0;
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    position: fixed;
+    bottom: -80px;
+    left: calc(50% - 17.5%);
+    z-index: 100;
+    transition: bottom 0.2s ease-in-out;
+  }
+
+  #successAlert p {
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  .timer-line {
+    height: 1px;
+    width: 100%;
+    background-color: #4CAF50;
+    margin-top: 15px;
+    transition: width 5s linear;
+  }
+
+  #successAlert.active {
+    bottom: 20px;
+  }
+
+  #successAlert.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease-in-out;
+  }
+
+
+  #successAlert.hidden .timer-line {
+    width: 100%;
+  }
+
+</style>
+
+</html>
